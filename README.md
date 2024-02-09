@@ -7,3 +7,12 @@ Starts containers for:
 - PostgreSQL
 - MongoDB
 - Elasticsearch
+
+## Requirements
+- Docker
+
+## Run
+
+```bash
+docker compose up -d
+```
