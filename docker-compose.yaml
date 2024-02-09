@@ -31,6 +31,9 @@ services:
   jms:
     image: apache/activemq-artemis:2.31.2-alpine
     container_name: default-jms
+    environment:
+      - ARTEMIS_USER=admin
+      - ARTEMIS_PASSWORD=jmsPassword
     networks:
       - default-net
     restart: always
