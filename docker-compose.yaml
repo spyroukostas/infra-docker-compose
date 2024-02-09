@@ -1,0 +1,88 @@
+version: '3'
+
+services:
+
+  redis:
+    image: bitnami/redis:latest
+    container_name: default-redis
+    networks:
+      - default-net
+    volumes :
+      - default-redisstore:/data
+    environment:
+      - REDIS_PASSWORD=redisPassword
+#      - ALLOW_EMPTY_PASSWORD=yes
+    restart: always
+
+
+  db:
+    image: postgres:alpine
+    container_name: default-db
+    networks:
+      - default-net
+    environment:
+      - POSTGRES_PASSWORD=postgresPassword
+    volumes:
+      - default-pg-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: always
+
+
+  jms:
+    image: apache/activemq-artemis:2.31.2-alpine
+    container_name: default-jms
+    networks:
+      - default-net
+    restart: always
+
+
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0
+    container_name: default-elastic
+    environment:
+      - node.name=elastic
+      - cluster.name=es-docker-cluster
+      - cluster.initial_master_nodes=elastic
+      - bootstrap.memory_lock=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - default-es-data:/usr/share/elasticsearch/data
+    networks:
+      - default-net
+    restart: always
+
+
+  mongo:
+    image: mongo
+    container_name: default-mongo
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=mongoPassword
+      - MONGO_INITDB_DATABASE=my-db
+    volumes:
+      - default-mongo-data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - default-net
+    restart: always
+
+
+volumes:
+  default-es-data:
+    driver: local
+  default-pg-data:
+    driver: local
+  default-redisstore:
+    driver: local
+  default-mongo-data:
+    driver: local
+
+networks:
+  default-net:
+    external: true
